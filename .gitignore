@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+
+# cromwell execution and logs
+cromwell-executions/
+cromwell-workflow-logs/
+
+# fastq input files
+fastq/
+
+#workflow outputs
+workflow-outputs/
