@@ -1,5 +1,28 @@
 version 1.0
 
+task filterSJout {
+    meta {
+        description: "Filter splice junctions from *.SJ.out.tab file; reduces spurious mapping"
+        # decreases runtime, multi-mapped reads
+        # limitSjdbInsertNsj=1000000, number of junctions to be inserted on the fly
+    }
+
+    input {
+        File sj_file
+    }
+
+    command {
+        set -e
+
+        python src/filterSJout.py ~{sj_file}
+        echo $?
+    }
+
+    output{
+        String out = read_string(stdout())
+    }
+}
+
 task STAR2PairedEndGetSjdb {
     meta {
         description: "Get *.SJ.out.tab file, does not output SAM/BAM"
@@ -54,7 +77,7 @@ task STAR2PairedEndGetSjdb {
     }
 
     output {
-        File output_bam = "~{write_subdirectory+input_id}_SJ.out.tab"
+        File output_sj_tab = "~{write_subdirectory+input_id}_SJ.out.tab"
     }
 }
 

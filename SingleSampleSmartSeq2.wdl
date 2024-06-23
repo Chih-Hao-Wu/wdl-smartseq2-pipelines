@@ -50,4 +50,10 @@ workflow SingleSampleSmartSeq2 {
             trimmed_fastq2_input = trimAdapters.trimmed_fastq2_input,
             workflow_output_dir = workflow_output_dir
     }
+
+    call AlignReads.filterSJout as filterSJout {
+        input:
+            sj_file = STAR2PairedEndGetSjdb.output_sj_tab
+    }
+
 }
