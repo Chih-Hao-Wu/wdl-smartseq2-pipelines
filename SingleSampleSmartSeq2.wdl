@@ -41,7 +41,7 @@ workflow SingleSampleSmartSeq2 {
             workflow_output_dir = workflow_output_dir
     }
 
-    call AlignReads.STAR2PassPairedEnd as STAR2PassPairedEnd {
+    call AlignReads.STAR2PairedEndGetSjdb as STAR2PairedEndGetSjdb {
         input:
             star_reference = star_reference,
             reference_genome = reference_genome,
