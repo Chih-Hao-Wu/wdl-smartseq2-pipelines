@@ -6,40 +6,34 @@ task trimAdapters {
     }
 
     input {
-        String adapter_string
+        String adapterString
+        String label
         Array[File] fastq
-        String fastq1_out_filename = sub(sub(fastq[0], "\\..*$", ""), "^.*/", "")
-        String fastq2_out_filename = sub(sub(fastq[1], "\\..*$", ""), "^.*/", "")
+        Array[String] suffixes
+        String workflowOutputDir
 
-        String workflow_output_dir   
-        String write_subdirectory = workflow_output_dir + "fastq/"
-
-        # runtime values
-        Int cpu = 1
-        Int mem_mb = 1908 # ~2 GB
+        # runtime arguments
+        Int alloc_cpu = 1
+        Int alloc_mem_mb = 1908 # MiB
     }
 
     command <<<
         set -e
-        
-        if [ ! -d "~{write_subdirectory}" ];
-            then
-            mkdir ~{write_subdirectory}
-        fi 
+
+        echo "~{suffixes[0]} ~{suffixes[1]}"
 
         # standardise file extension
         function standardise_file_extension {
             local path_to_file=$1
             local compressed=$2
 
-            if $compressed;
-                then
-                new_file_name="${path_to_file%%.*}.fastq.gz"
+            if $compressed; then
+                replace_file="${path_to_file%%.*}.fastq.gz"
             else
-                new_file_name="${path_to_file%%.*}.fastq"
+                replace_file="${path_to_file%%.*}.fastq"
             fi
-
-            mv "$path_to_file" "$new_file_name"
+            
+            mv ${path_to_file} ${replace_file}
             echo $new_file_name
         }
 
@@ -56,24 +50,21 @@ task trimAdapters {
         module load trimgalore/0.6.7
 
         trim_galore \
-            -j ~{cpu} \
-            --output_dir ~{write_subdirectory} \
+            -j ~{alloc_cpu} \
+            --output_dir ~{workflowOutputDir} \
             --paired \
-            --adapter ~{adapter_string} \
+            --adapter ~{adapterString} \
             $fq1 \
             $fq2
-
     >>>
 
     runtime {
-        #docker: docker
-        memory: "${mem_mb} MiB"
-        cpu: cpu
+        memory: "${alloc_mem_mb} MiB"
+        cpu: alloc_cpu
     }
 
     output {
-        File trimmed_fastq1_input = "~{write_subdirectory+fastq1_out_filename}_val_1.fq.gz"
-        File trimmed_fastq2_input = "~{write_subdirectory+fastq2_out_filename}_val_2.fq.gz"
+        File trimmedFastqInput1 = "~{workflowOutputDir+label+suffixes[0]}_val_1.fq.gz"
+        File trimmedFastqInput2 = "~{workflowOutputDir+label+suffixes[1]}_val_2.fq.gz"
     }
-
 }

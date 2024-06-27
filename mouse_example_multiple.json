@@ -1,0 +1,23 @@
+{
+    "MultiSampleSmartSeq2.labels": [
+        "103_P09_C01",
+        "115_P03_B01",
+        "115_P07_F05"
+    ],
+    "MultiSampleSmartSeq2.adapterString": "TESTER",
+    "MultiSampleSmartSeq2.fastqPairedFiles": {
+        "left": [
+            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/103_P09_C01_R1_001.fastq.gz",
+            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P03_B01_R1_001.fastq.gz",
+            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P07_F05_R1_001.fastq.gz"
+        ],
+        "right": [
+            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/103_P09_C01_R2_001.fastq.gz",
+            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P03_B01_R2_001.fastq.gz",
+            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P07_F05_R2_001.fastq.gz"
+        ]
+    },
+    "MultiSampleSmartSeq2.referenceGenome": "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/reference/genome.fasta",
+    "MultiSampleSmartSeq2.referenceStarIndex": "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/reference/"
+}
+  

@@ -1,4 +1,4 @@
-# filterSJout.py
+# filterSpliceJunctions.py
 
 import sys
 import os

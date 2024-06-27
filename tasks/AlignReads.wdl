@@ -1,115 +1,70 @@
 version 1.0
 
-task filterSJout {
-    meta {
-        description: "Filter splice junctions from *.SJ.out.tab file; reduces spurious mapping"
-        # decreases runtime, multi-mapped reads
-        # limitSjdbInsertNsj=1000000, number of junctions to be inserted on the fly
-    }
-
+task STARGetSjdbPairedEnd {
     input {
-        File sj_file
-    }
+        String referenceStarIndex
+        File referenceGenome
+        String label
+        File fastq1
+        File fastq2
+        String workflowOutputDir
 
-    command {
-        set -e
-
-        python src/filterSJout.py ~{sj_file}
-        echo $?
-    }
-
-    output{
-        String out = read_string(stdout())
-    }
-}
-
-task STAR2PairedEndGetSjdb {
-    meta {
-        description: "Get *.SJ.out.tab file, does not output SAM/BAM"
-    }
-
-    input {
-        String star_reference
-        File reference_genome
-        String input_id
-        File trimmed_fastq1_input
-        File trimmed_fastq2_input
-
-        String workflow_output_dir
-        String write_subdirectory = workflow_output_dir + "mapped/sjdb/"
-        
-        # runtime values
-        Int mem_mb = ceil(size(reference_genome, "Gi")) * 12000
-        Int cpus = 6
+        # runtime arguments
+        Int alloc_cpu = 6
+        Int alloc_mem_mb = ceil(size(referenceGenome, "Gi")) * 12000
     }
 
     command <<<
         set -e
 
-        if [ ! -d ~{write_subdirectory} ];
-            then
-            mkdir -p ~{write_subdirectory}
-        fi
-
         zcat_option="-"
-        if ( file ~{trimmed_fastq1_input} | grep -q compressed );
-            then
+        if ( file ~{fastq1} | grep -q compressed ); then
             zcat_option="zcat"
         fi
 
         module load STAR/2.7.11b
 
         STAR \
-            --runThreadN ~{cpus} \
-            --genomeDir ~{star_reference} \
+            --runThreadN ~{alloc_cpu} \
+            --genomeDir ~{referenceStarIndex} \
             --readFilesCommand $zcat_option \
-            --readFilesIn ~{trimmed_fastq1_input} ~{trimmed_fastq2_input} \
-            --outFileNamePrefix "~{write_subdirectory+input_id}_" \
+            --readFilesIn ~{fastq1} ~{fastq2} \
+            --outFileNamePrefix "~{workflowOutputDir+label}_" \
             --outSAMtype None
 
         # https://groups.google.com/g/rna-star/c/QxLqZxqOzko/m/EJKk_agACAAJ
         # https://groups.google.com/g/rna-star/c/f4SsgQYTDeM/m/ieVT1a2QBwAJ
     >>>
 
-    runtime{
-        memory: "${mem_mb} MiB"
-        cpu: cpus
+    runtime {
+        memory: "${alloc_mem_mb} MiB"
+        cpu: alloc_cpu     
     }
 
     output {
-        File output_sj_tab = "~{write_subdirectory+input_id}_SJ.out.tab"
+        File outputSpliceJunction = "~{workflowOutputDir+label}_SJ.out.tab"
     }
 }
 
-task STARSecondPassPairedEnd {
-    meta {
-        description: "Aligns reads in paired *.fastq files to reference genome"
-    }
-
+task STARTwoPassPairedEnd {
     input {
-        String star_reference # /path/to/genome/
-        File reference_genome
-        String input_id
-        File trimmed_fastq1_input
-        File trimmed_fastq2_input
+        String referenceStarIndex
+        File referenceGenome
+        String label
+        File fastq1
+        File fastq2
+        String workflowOutputDir
 
-        String workflow_output_dir   
-        String write_subdirectory = workflow_output_dir + "mapped/"
-
-        # runtime values
-        Int mem_mb = ceil(size(reference_genome, "Gi")) * 12000
-        Int cpus = 6
-        # multiply input size by 2.2 to account for output bam file + 20% overhead, add size of reference.
-        # the amount of space on disk needed is at least ~3*sizeOfGzippedFastqs.
-        # Int disk = ceil((size(reference_genome, "Gi") * 2) + (size(trimmed_fastq1_input, "Gi") * 5.0))
+        # runtime arguments
+        Int alloc_cpu = 6
+        Int alloc_mem_mb = ceil(size(referenceGenome, "Gi")) * 12000
     }
 
     command <<<
         set -e
 
         zcat_option="-"
-        if ( file ~{trimmed_fastq1_input} | grep -q compressed );
-            then
+        if ( file ~{fastq1} | grep -q compressed ); then
             zcat_option="zcat"
         fi
 
@@ -117,11 +72,11 @@ task STARSecondPassPairedEnd {
 
         # one pass
         STAR \
-            --runThreadN ~{cpus} \
-            --genomeDir ~{star_reference} \
+            --runThreadN ~{alloc_cpu} \
+            --genomeDir ~{referenceStarIndex} \
             --readFilesCommand $zcat_option \
-            --readFilesIn ~{trimmed_fastq1_input} ~{trimmed_fastq2_input} \
-            --outFileNamePrefix "~{write_subdirectory+input_id}_" \
+            --readFilesIn ~{fastq1} ~{fastq2} \
+            --outFileNamePrefix "~{workflowOutputDir+label}_" \
             --outSAMtype BAM SortedByCoordinate \
             --sjdbInsertSave All \
             --quantMode TranscriptomeSAM GeneCounts \
@@ -134,14 +89,11 @@ task STARSecondPassPairedEnd {
     >>>
 
     runtime {
-        memory: "${mem_mb} MiB"
-        cpu: cpus
-        #disk: disk + " GB"
+        memory: "${alloc_mem_mb} MiB"
+        cpu: alloc_cpu     
     }
     
     output {
-        File output_bam = "~{write_subdirectory+input_id}_Aligned.sortedByCoord.out.bam"
+        File outputSortedBam = "~{workflowOutputDir+label}_Aligned.sortedByCoord.out.bam"
     }
 }
-
-
