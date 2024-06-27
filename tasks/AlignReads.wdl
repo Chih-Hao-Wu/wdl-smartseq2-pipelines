@@ -14,7 +14,7 @@ task filterSJout {
     command {
         set -e
 
-        python src/filterSJout.py ~{sj_file}
+        python /data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/src/filterSJout.py ~{sj_file}
         echo $?
     }
 
