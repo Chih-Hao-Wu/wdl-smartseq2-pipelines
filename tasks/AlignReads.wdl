@@ -54,6 +54,7 @@ task STARTwoPassPairedEnd {
         File fastq1
         File fastq2
         String workflowOutputDir
+        File sjdbFile
 
         # runtime arguments
         Int alloc_cpu = 6
@@ -78,6 +79,7 @@ task STARTwoPassPairedEnd {
             --readFilesIn ~{fastq1} ~{fastq2} \
             --outFileNamePrefix "~{workflowOutputDir+label}_" \
             --outSAMtype BAM SortedByCoordinate \
+            --sjdbFileChrStartEnd ~{sjdbFile} \
             --sjdbInsertSave All \
             --quantMode TranscriptomeSAM GeneCounts \
             --outFilterMultimapNmax 10 \

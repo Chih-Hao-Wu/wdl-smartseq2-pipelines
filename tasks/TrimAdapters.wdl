@@ -20,8 +20,6 @@ task trimAdapters {
     command <<<
         set -e
 
-        echo "~{suffixes[0]} ~{suffixes[1]}"
-
         # standardise file extension
         function standardise_file_extension {
             local path_to_file=$1
@@ -34,7 +32,7 @@ task trimAdapters {
             fi
             
             mv ${path_to_file} ${replace_file}
-            echo $new_file_name
+            echo $replace_file
         }
 
         is_compressed=false
@@ -47,6 +45,8 @@ task trimAdapters {
         fq1=$(standardise_file_extension ~{fastq[0]} $is_compressed)
         fq2=$(standardise_file_extension ~{fastq[1]} $is_compressed)
 
+        echo $fq1
+          
         module load trimgalore/0.6.7
 
         trim_galore \

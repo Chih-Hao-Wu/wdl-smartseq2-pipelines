@@ -4,20 +4,20 @@
         "115_P03_B01",
         "115_P07_F05"
     ],
-    "MultiSampleSmartSeq2.adapterString": "TESTER",
+    "MultiSampleSmartSeq2.adapterString": "CTGTCTCTTATA",
     "MultiSampleSmartSeq2.fastqPairedFiles": {
         "left": [
-            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/103_P09_C01_R1_001.fastq.gz",
-            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P03_B01_R1_001.fastq.gz",
-            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P07_F05_R1_001.fastq.gz"
+            "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/103_P09_C01_R1_001.fastq.gz",
+            "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/115_P03_B01_R1_001.fastq.gz",
+            "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/115_P07_F05_R1_001.fastq.gz"
         ],
         "right": [
-            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/103_P09_C01_R2_001.fastq.gz",
-            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P03_B01_R2_001.fastq.gz",
-            "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/fastq/115_P07_F05_R2_001.fastq.gz"
+            "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/103_P09_C01_R2_001.fastq.gz",
+            "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/115_P03_B01_R2_001.fastq.gz",
+            "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/115_P07_F05_R2_001.fastq.gz"
         ]
     },
-    "MultiSampleSmartSeq2.referenceGenome": "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/reference/genome.fasta",
-    "MultiSampleSmartSeq2.referenceStarIndex": "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/reference/"
+    "MultiSampleSmartSeq2.referenceGenome": "/data/CDSLSahinalp/chihhao/reference/grcm39/release-m35/GRCm39.primary_assembly.genome.fa",
+    "MultiSampleSmartSeq2.referenceStarIndex": "/data/CDSLSahinalp/chihhao/reference/grcm39/release-m35/"
 }
   

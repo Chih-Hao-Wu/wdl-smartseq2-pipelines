@@ -26,7 +26,7 @@ workflow MultiSampleSmartSeq2 {
         Pair[Array[File], Array[File]] fastqPairedFiles
     }
 
-    String workflowOutputDir = "/Users/wuchh/project/cromwell/wdl-smartseq2-pipelines/workflow-outputs/"
+    String workflowOutputDir = "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/workflow-outputs/"
 
     # check arrays
     call CheckInputs.checkInputArrays as checkInputArrays {
@@ -61,19 +61,27 @@ workflow MultiSampleSmartSeq2 {
                 fastq2 = trimAdapters.trimmedFastqInput2,
                 workflowOutputDir = workflowOutputDir + "mapped/sjdb/"
         }
-        
+    }
+
+    # merge *.SJ.out.tab and map
+    call gatherSpliceJunctions {
+        input:
+            spliceJunctionFiles = STAR2PairedEndGetSjdb.outputSpliceJunction,
+            workflowOutputDir = workflowOutputDir + "mapped/sjdb/"
+    }
+
+    scatter (i in range(length(labels))) {
         call AlignReads.STARTwoPassPairedEnd as STARTwoPassPairedEnd {
             input:
                 referenceStarIndex = referenceStarIndex,
                 referenceGenome = referenceGenome,
                 label = labels[i],
-                fastq1 = trimAdapters.trimmedFastqInput1,
-                fastq2 = trimAdapters.trimmedFastqInput2,
-                workflowOutputDir = workflowOutputDir + "mapped/"
+                fastq1 = trimAdapters.trimmedFastqInput1[i],
+                fastq2 = trimAdapters.trimmedFastqInput2[i],
+                workflowOutputDir = workflowOutputDir + "mapped/",
+                sjdbFile = gatherSpliceJunctions.sjdbConcatenatedFile
         }
     }
-
-    # merge *.SJ.out.tab and map
 }
 
 task createWorkflowSubdirectory {
@@ -95,18 +103,30 @@ task createWorkflowSubdirectory {
     >>>
 }
 
-    # merge *.SJ.out.tab and map
-    #call AlignReads.concatSpliceJunctions as concatSpliceJunctions {
-    #     input:
-    #         sj_files = sj_files
-    # }
+task gatherSpliceJunctions {
+    input {
+        Array[File] spliceJunctionFiles
+        String workflowOutputDir
+        String filteredJointFile = workflowOutputDir + "filteredJoint_SJ.out.tab"
+    }
 
-    # scatter (fastq in fastq_paired_files) {
-    #     call singleSample.SingleSampleSmartSeq2 as SingleSampleSmartSeq2 {
-    #         input:
-    #             fastq = fastq
-    #     }
-    # }
+    command <<<
+        set -e
+
+        >~{filteredJointFile}
+
+        declare -a splJuncFiles=(~{sep=' ' spliceJunctionFiles})
+        
+        for (( i=0; i<${#splJuncFiles[@]}; ++i )); do
+            python /data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/src/filterSpliceJunctions.py ${splJuncFiles[$i]} >> ~{filteredJointFile}
+        done
+    >>>
+
+    output {
+        File sjdbConcatenatedFile = "~{filteredJointFile}"
+    }
+}
+    # Picard
 
     # HaplotypeCaller
 
