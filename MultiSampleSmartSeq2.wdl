@@ -3,6 +3,8 @@ version 1.0
 import "tasks/CheckInputs.wdl" as CheckInputs
 import "tasks/TrimAdapters.wdl" as TrimAdapters
 import "tasks/AlignReads.wdl" as AlignReads
+import "tasks/Picard.wdl" as Picard
+import "tasks/MutationCall.wdl" as MutationCall
 
 workflow MultiSampleSmartSeq2 {
     meta {
@@ -22,6 +24,7 @@ workflow MultiSampleSmartSeq2 {
         # samples
         String referenceStarIndex
         File referenceGenome
+        Array[String] knownSitesFiles
         Array[String] labels
         Pair[Array[File], Array[File]] fastqPairedFiles
     }
@@ -39,7 +42,7 @@ workflow MultiSampleSmartSeq2 {
     call createWorkflowSubdirectory {
         input:
             workflowOutputDir = workflowOutputDir,
-            subdirectoryNames = ["fastq/", "mapped/", "mapped/sjdb/"]
+            subdirectoryNames = ["fastq/", "mapped/", "mapped/sjdb/", "variants/"]
     }
 
     scatter (i in range(length(labels))) {
@@ -80,6 +83,51 @@ workflow MultiSampleSmartSeq2 {
                 fastq2 = trimAdapters.trimmedFastqInput2[i],
                 workflowOutputDir = workflowOutputDir + "mapped/",
                 sjdbFile = gatherSpliceJunctions.sjdbConcatenatedFile
+        }
+
+        call Picard.addOrReplaceReadGroups as addOrReplaceReadGroups {
+            input:
+                workflowOutputDir = workflowOutputDir + "mapped/",
+                label = labels[i],
+                bamFileIn = STARTwoPassPairedEnd.outputSortedBam
+        }
+
+        call Picard.markDuplicates as markDuplicates {
+            input:
+                workflowOutputDir = workflowOutputDir + "mapped/",
+                label = labels[i],
+                bamFileIn = addOrReplaceReadGroups.outputReadGroupsBam
+        }
+
+        call Picard.splitNCigarStrings as splitNCigarStrings {
+            input:
+                workflowOutputDir = workflowOutputDir + "mapped/",
+                label = labels[i],
+                bamFileIn = markDuplicates.outputMarkDuplBam
+                #referenceGenome = referenceGenome
+        }
+
+        call Picard.baseScoreRecal as baseScoreRecal {
+            input:
+                workflowOutputDir = workflowOutputDir + "mapped/",
+                label = labels[i],
+                bamFileIn = splitNCigarStrings.outputSplCigBam,
+                knownSitesFiles = knownSitesFiles
+        }
+
+        call Picard.applyBaseScoreRecal as applyBaseScoreRecal {
+            input:
+                workflowOutputDir = workflowOutputDir + "mapped/",
+                bamFileIn = splitNCigarStrings.outputSplCigBam,
+                recalTable = baseScoreRecal.outputRecalTable
+        }
+
+        call MutationCall.HaplotypeCallerGvcf as HaplotypeCallerGvcf {
+            input:
+                workflowOutputDir = workflowOutputDir + "variants/",
+                label = labels[i],
+                bamFileIn = applyBaseScoreRecal.outputRecalBamFilename,
+                dbSNPFile = knownSitesFiles[1]
         }
     }
 }

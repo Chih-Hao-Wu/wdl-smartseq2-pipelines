@@ -17,6 +17,10 @@
             "/data/CDSLSahinalp/chihhao/cromwell/smartseq2_single_sample/fastq/115_P07_F05_R2_001.fastq.gz"
         ]
     },
+    "MultiSampleSmartSeq2.knownSitesFiles": [
+        "/data/CDSLSahinalp/chihhao/reference/grcm39/mgp_REL2021_indels_swp_chr.vcf.gz",
+        "/data/CDSLSahinalp/chihhao/reference/grcm39/mgp_REL2021_snps_swp_chr.vcf.gz"
+    ],
     "MultiSampleSmartSeq2.referenceGenome": "/data/CDSLSahinalp/chihhao/reference/grcm39/release-m35/GRCm39.primary_assembly.genome.fa",
     "MultiSampleSmartSeq2.referenceStarIndex": "/data/CDSLSahinalp/chihhao/reference/grcm39/release-m35/"
 }
